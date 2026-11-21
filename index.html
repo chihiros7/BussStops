@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>バスあと何分？</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="icon-512.png">
+</head>
+<body>
+    <div class="container">
+        
+        <div class="bus-info">
+            <h2 id="departure-station">--</h2>
+            <div id="destination-station" class="arrow">↓ -- 行</div>
+        </div>
+
+        <div class="countdown-area">
+            <div id="minutes" class="minutes">計算中...</div>
+            <div id="schedule-details" class="schedule-details">次発: --:--</div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="tabs">
+                <button id="tab-outbound" class="tab-btn">行き (駅方面)</button>
+                <button id="tab-inbound" class="tab-btn">帰り (パーク方面)</button>
+            </div>
+            <button id="timetable-open" class="timetable-open-btn" type="button">時刻表を見る</button>
+            <button id="refresh-btn" class="refresh-btn">最新の状態に更新</button>
+            
+            <div style="font-size: 0.75rem; color: #bbbbbb; margin-top: 12px; text-align: right; padding-right: 5px; letter-spacing: 0.05em;">
+                ver 1.02
+            </div>
+        </div>
+
+    </div>
+    <div id="timetable-modal" class="timetable-overlay" role="dialog" aria-modal="true" aria-labelledby="timetable-title" hidden>
+        <div class="timetable-card">
+            <div class="timetable-heading">
+                <h2 id="timetable-title">時刻表</h2>
+                <button id="timetable-close" class="timetable-close" type="button" aria-label="時刻表を閉じる">×</button>
+            </div>
+            <p id="timetable-route" class="timetable-route"></p>
+            <div class="timetable-direction" role="group" aria-label="表示する方向">
+                <button id="timetable-outbound" class="timetable-direction-btn" type="button">行き（駅方面）</button>
+                <button id="timetable-inbound" class="timetable-direction-btn" type="button">帰り（パーク方面）</button>
+            </div>
+            <div class="timetable-scroll">
+                <table class="timetable-table">
+                    <thead><tr><th scope="col">時</th><th scope="col" id="weekday-header">平日</th><th scope="col" id="holiday-header">土日祝</th></tr></thead>
+                    <tbody id="timetable-body"></tbody>
+                </table>
+            </div>
+            <p class="timetable-note">時刻は発車予定時刻です。祝日・お盆・年末年始は土日祝ダイヤで運行します。ダイヤ改正や道路状況によって変わる場合があります。</p>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
