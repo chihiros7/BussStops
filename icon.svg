@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">東バス山のアプリアイコン</title>
+  <defs>
+    <linearGradient id="forest" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1c915e"/>
+      <stop offset="1" stop-color="#126a45"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#forest)"/>
+  <!-- 東松山を連想させる二つの山並み -->
+  <path d="M85 267 174 139 245 235 309 167 427 291" fill="none" stroke="#aee7c1" stroke-width="23" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m155 167 19-28 22 31" fill="none" stroke="#e6fff0" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 小さくても判別できる正面向きのバス -->
+  <rect x="119" y="231" width="274" height="197" rx="48" fill="#fff"/>
+  <rect x="151" y="264" width="210" height="93" rx="17" fill="#16784c"/>
+  <path d="M165 280h181" stroke="#aee7c1" stroke-width="8" stroke-linecap="round"/>
+  <path d="M256 273v75" stroke="#aee7c1" stroke-width="6" stroke-linecap="round"/>
+  <rect x="174" y="374" width="164" height="11" rx="5.5" fill="#d3efdc"/>
+  <circle cx="172" cy="397" r="15" fill="#16784c"/>
+  <circle cx="340" cy="397" r="15" fill="#16784c"/>
+  <rect x="153" y="425" width="54" height="21" rx="9" fill="#fff"/>
+  <rect x="305" y="425" width="54" height="21" rx="9" fill="#fff"/>
+</svg>

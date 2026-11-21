@@ -1,12 +1,15 @@
-const CACHE_NAME = 'bus-app-1.08';
+const CACHE_NAME = 'bus-app-1.09';
 
 const ASSETS = [
   './',
   './index.html',
-  './style.css?v=108',
-  './app.js?v=108',
-  './train-data.js?v=108',
-  './manifest.json'
+  './style.css?v=109',
+  './app.js?v=109',
+  './train-data.js?v=109',
+  './manifest.json',
+  './icon.svg',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
