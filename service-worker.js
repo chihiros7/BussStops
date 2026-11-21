@@ -1,10 +1,11 @@
-const CACHE_NAME = 'bus-app-1.03';
+const CACHE_NAME = 'bus-app-1.04';
 
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './app.js',
+  './train-data.js',
   './manifest.json'
 ];
 

@@ -1,0 +1,131 @@
+const trainTimetableData = {
+  "revised": "2026-03-14",
+  "description": "東松山駅発・時刻表ベース（リアルタイムではありません）",
+  "directions": {
+    "up": {
+      "label": "池袋方面",
+      "types": {
+        "A": "急行",
+        "B": "普通",
+        "C": "準急",
+        "D": "TJライナー",
+        "E": "快速急行",
+        "F": "Fライナー",
+        "G": "川越特急"
+      },
+      "destinations": {
+        "a": "池袋",
+        "b": "新木場",
+        "c": "湘南台",
+        "d": "元町・中華街",
+        "e": "川越市"
+      },
+      "weekday": {
+        "10": "Ea03 Ad10 Aa23 Aa34 Fd43 Aa53",
+        "11": "Aa04 Fd13 Aa23 Aa34 Fd43 Aa53",
+        "12": "Aa04 Fd13 Aa23 Aa34 Fd43 Aa53",
+        "13": "Aa04 Fd13 Aa23 Aa34 Fd43 Aa53",
+        "14": "Aa04 Fd13 Aa23 Aa34 Fd43 Aa53",
+        "15": "Aa04 Ad15 Aa23 Aa36 Bd40 Aa50",
+        "16": "Ga02 Aa05 Bd09 Aa20 Ga33 Aa35 Bd40 Aa50",
+        "17": "Ga03 Aa06 Bc10 Aa20 Ca26 Ga33 Aa36 Bb39 Aa50 Ca56",
+        "18": "Ga03 Aa06 Ba10 Aa20 Ca26 Ga33 Aa36 Ba42 Aa50 Ca55",
+        "19": "Ga02 Aa06 Ba10 Aa20 Bb24 Ga32 Aa36 Ca46 Aa50 Ca56",
+        "20": "Ga02 Aa05 Ca16 Aa20 Ga32 Aa36 Ca46 Aa50 Ba54",
+        "21": "Ga03 Aa05 Aa21 Ga33 Aa36 Bd41 Ca46 Aa50",
+        "22": "Ga03 Aa06 Ca19 Ga33 Aa36 Ea54",
+        "23": "Ca06 Ca20",
+        "05": "Aa03 Bb10 Bb15 Ca20 Aa24 Ca28 Ac34 Ba40 Aa45 Ca49 Bc54 Aa57",
+        "06": "Da06 Bb09 Aa15 Ba22 Aa26 Da34 Bb36 Aa42 Bd47 Ca50 Aa53",
+        "07": "Ca00 Aa04 Bb07 Bb09 Ca12 Aa16 Bb21 Ca25 Aa29 Bb37 Aa44 Bb50 Da58",
+        "08": "Aa02 Aa14 Da22 Aa29 Aa39 Aa50 Da57",
+        "09": "Ca00 Ad08 Aa16 Ca24 Ea34 Ad41 Aa52",
+        "00": "Be03 Be42"
+      },
+      "holiday": {
+        "10": "Ca05 Fd15 Aa23 Aa34 Ca38 Fd43 Aa53",
+        "11": "Aa04 Ba09 Fd14 Aa23 Aa34 Fd43 Aa54",
+        "12": "Aa04 Fd13 Aa23 Aa34 Fd43 Aa54",
+        "13": "Aa04 Fd13 Aa23 Aa34 Fd43 Aa53",
+        "14": "Aa04 Fd13 Aa23 Aa34 Fd43 Aa53",
+        "15": "Aa04 Fd13 Aa23 Aa34 Fd43 Bb53",
+        "16": "Ga02 Aa05 Fd14 Aa21 Ga32 Aa36 Fd45 Aa51",
+        "17": "Ga03 Aa07 Fd15 Aa21 Ga34 Aa36 Bb42 Aa50",
+        "18": "Ga04 Aa07 Bb11 Aa21 Ga33 Aa37 Bb43 Aa51",
+        "19": "Ga04 Aa06 Bb12 Aa21 Ga34 Aa36 Bb41 Aa51",
+        "20": "Ga04 Aa06 Bb09 Aa20 Ga34 Aa39 Bd47 Ea58",
+        "21": "Aa09 Ca20 Ba26 Aa36 Aa48",
+        "22": "Aa01 Ca08 Ca19 Ca32 Ca45 Ca59",
+        "23": "Ca12 Be53",
+        "05": "Aa03 Ba15 Aa24 Bb29 Aa36 Bd40 Aa47 Ad54",
+        "06": "Ba00 Ec05 Bb10 Aa14 Bb21 Aa29 Bc41 Aa46 Ea57",
+        "07": "Ca02 Aa07 Bb13 Ca18 Ea27 Bd31 Aa36 Aa45 Ea57",
+        "08": "Aa07 Bb11 Fd16 Aa27 Da35 Ba38 Ad42 Aa51",
+        "09": "Da01 Aa05 Ad12 Aa21 Da31 Bd34 Aa38 Aa46 Aa58",
+        "00": "Be42"
+      }
+    },
+    "down": {
+      "label": "小川町方面",
+      "types": {
+        "A": "普通",
+        "B": "急行",
+        "C": "快速急行",
+        "D": "準急",
+        "E": "川越特急",
+        "F": "Fライナー",
+        "G": "TJライナー"
+      },
+      "destinations": {
+        "a": "小川町",
+        "b": "森林公園"
+      },
+      "weekday": {
+        "10": "Ba10 Ab19 Bb25 Db29 Bb41 Ea44 Ab53 Ab57",
+        "11": "Ba05 Eb14 Ab21 Bb35 Eb44 Bb51 Ab58",
+        "12": "Ba07 Db10 Fb18 Bb27 Bb37 Fb48 Bb57",
+        "13": "Bb07 Fb18 Bb27 Bb37 Fb48 Bb57",
+        "14": "Bb07 Fb18 Bb27 Bb37 Fb48 Bb57",
+        "15": "Ba07 Fb18 Bb27 Ba37 Fb48 Ba57",
+        "16": "Ba07 Fb18 Ba27 Ba37 Fb48 Ba57",
+        "17": "Bb07 Fb18 Ba27 Bb37 Ga45 Bb52 Ba59",
+        "18": "Ab06 Bb14 Ga16 Db23 Ba28 Db32 Bb42 Ga45 Bb53",
+        "19": "Ba00 Ab07 Bb13 Ga15 Db23 Ba28 Db32 Ab38 Bb42 Ga45 Bb53",
+        "20": "Ba00 Ab08 Bb13 Ga15 Db23 Ba28 Db32 Bb41 Ga45 Bb53",
+        "21": "Ba00 Ab09 Bb13 Ga16 Db23 Ba29 Ab36 Bb42 Ga45 Bb53",
+        "22": "Ba00 Ab07 Bb14 Ga16 Db23 Ba29 Ab40 Ga45 Bb53 Ba59",
+        "23": "Ab09 Ga14 Db22 Bb29 Ab41 Ga44 Bb52 Ab57",
+        "05": "Aa26 Aa51",
+        "06": "Aa10 Ba26 Aa41 Ba56",
+        "07": "Ba11 Ba26 Ba42 Aa49 Cb55",
+        "08": "Db03 Ba14 Aa22 Cb27 Db35 Ba41 Cb49 Ba58",
+        "09": "Ab05 Ba13 Ab20 Db26 Ba30 Ab36 Ba42 Ab51 Ba57",
+        "00": "Ba00 Ab07 Db13 Gb15 Bb21 Ab28 Db34 Ab41 Gb44 Ab52 Db56",
+        "01": "Db05"
+      },
+      "holiday": {
+        "10": "Bb05 Ab10 Fb19 Bb28 Bb41 Ea45 Db51 Ab58",
+        "11": "Bb07 Ea15 Bb22 Ab29 Bb36 Ea45 Bb51",
+        "12": "Ba06 Db11 Fb18 Bb27 Bb37 Fb48 Bb57",
+        "13": "Bb07 Fb18 Bb27 Bb37 Fb48 Bb57",
+        "14": "Bb07 Fb18 Bb27 Bb37 Fb48 Bb57",
+        "15": "Bb07 Fb18 Bb27 Ba37 Fb48 Ba57",
+        "16": "Bb07 Fb18 Ba27 Bb37 Fb48 Ba57",
+        "17": "Ba07 Fb18 Ba27 Bb37 Ab44 Ga46 Bb52",
+        "18": "Ba04 Ab13 Ga15 Bb22 Ab32 Ba37 Ab43 Ga46 Bb52",
+        "19": "Ba03 Ab12 Ga15 Bb21 Ba36 Ab43 Ga46 Bb53",
+        "20": "Ba06 Ab13 Ga15 Bb22 Ba36 Ab43 Ga45 Bb52",
+        "21": "Bb03 Ab11 Ga14 Bb21 Ba36 Ab43 Ga46 Bb53",
+        "22": "Ba04 Ga14 Bb21 Ba29 Ab33 Ab40 Ga44 Bb51 Db55",
+        "23": "Ab00 Ba06 Db10 Ab16 Ba28 Ab35 Db44 Ba58",
+        "05": "Aa26 Aa50",
+        "06": "Aa10 Da32 Ca51 Ab59",
+        "07": "Ba11 Ca23 Db35 Ba40 Ca53",
+        "08": "Ab00 Ba06 Bb16 Ca24 Bb32 Bb42 Ca51 Ab58",
+        "09": "Bb08 Bb17 Fa24 Ba32 Bb41 Ca52",
+        "00": "Ab06 Db19 Ab29 Db37 Db52",
+        "01": "Db05"
+      }
+    }
+  }
+};

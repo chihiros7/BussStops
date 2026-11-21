@@ -123,13 +123,19 @@ function usesHolidayTimetable(date) {
 
 // 初回は「駅へ行く」。以降はユーザーが最後に選んだ方向を使う。
 const DIRECTION_KEY = 'bussstops-direction';
+const TRAIN_DIRECTION_KEY = 'bussstops-train-direction';
+const BUS_TO_STATION_MINUTES = 14;
+const STATION_TRANSFER_MINUTES = 5;
 let currentDirection = 'outbound';
+let trainDirection = 'up';
 let selectedDaytype = 'weekday';
 
 window.addEventListener('DOMContentLoaded', () => {
     try {
         const saved = localStorage.getItem(DIRECTION_KEY);
         if (saved === 'outbound' || saved === 'inbound') currentDirection = saved;
+        const savedTrainDirection = localStorage.getItem(TRAIN_DIRECTION_KEY);
+        if (savedTrainDirection === 'up' || savedTrainDirection === 'down') trainDirection = savedTrainDirection;
     } catch (_) {
         // ストレージが無効でも時刻表は利用できる。
     }
@@ -138,6 +144,8 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('tab-outbound').addEventListener('click', () => switchDirection('outbound'));
     document.getElementById('tab-inbound').addEventListener('click', () => switchDirection('inbound'));
     document.getElementById('refresh-btn').addEventListener('click', updateCountdown);
+    document.getElementById('train-up').addEventListener('click', () => switchTrainDirection('up'));
+    document.getElementById('train-down').addEventListener('click', () => switchTrainDirection('down'));
 
     document.getElementById('timetable-open').addEventListener('click', () => {
         selectedDaytype = usesHolidayTimetable(new Date()) ? 'holiday' : 'weekday';
@@ -167,6 +175,122 @@ function switchDirection(direction) {
     try { localStorage.setItem(DIRECTION_KEY, direction); } catch (_) { /* 保存不可でも動作する */ }
     updateCountdown();
     if (!document.getElementById('timetable-view').hidden) renderTimetable();
+}
+
+function switchTrainDirection(direction) {
+    trainDirection = direction;
+    try { localStorage.setItem(TRAIN_DIRECTION_KEY, direction); } catch (_) { /* 保存不可でも動作する */ }
+    updateCountdown();
+}
+
+// バス特有のお盆・年末年始ダイヤを鉄道に転用しない。
+function usesRailHolidayTimetable(date) {
+    if (date.getDay() === 0 || date.getDay() === 6) return true;
+    const mmdd = `${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    return japaneseHolidays[date.getFullYear()]?.has(mmdd) ?? false;
+}
+
+function getRailServiceDepartures(serviceDay, direction) {
+    const info = trainTimetableData.directions[direction];
+    const schedule = info[usesRailHolidayTimetable(serviceDay) ? 'holiday' : 'weekday'];
+    const results = [];
+    for (const [hourText, encoded] of Object.entries(schedule)) {
+        const hour = Number(hourText);
+        for (const token of encoded.split(' ')) {
+            const parts = token.match(/^([A-G])([a-z])(\d{2})$/);
+            if (!parts) continue;
+            const min = Number(parts[3]);
+            const departure = new Date(
+                serviceDay.getFullYear(), serviceDay.getMonth(),
+                serviceDay.getDate() + (hour < 4 ? 1 : 0), hour, min
+            );
+            results.push({
+                departure,
+                kind: info.types[parts[1]],
+                destination: info.destinations[parts[2]]
+            });
+        }
+    }
+    return results;
+}
+
+function findUpcomingTrains(at, direction = trainDirection, limit = 3) {
+    const serviceDay = new Date(at.getFullYear(), at.getMonth(), at.getDate());
+    // 0～2時台の終電は前日のダイヤに属する。
+    if (at.getHours() < 3) serviceDay.setDate(serviceDay.getDate() - 1);
+    const trains = [];
+    for (let dayOffset = 0; dayOffset < 3; dayOffset++) {
+        const day = new Date(serviceDay.getFullYear(), serviceDay.getMonth(), serviceDay.getDate() + dayOffset);
+        trains.push(...getRailServiceDepartures(day, direction));
+    }
+    return trains
+        .filter(train => train.departure.getTime() >= at.getTime())
+        .sort((a, b) => a.departure - b.departure)
+        .slice(0, limit);
+}
+
+function formatClock(date) {
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
+function renderTrainDisplay(now, nextBus) {
+    const railServiceDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (now.getHours() < 3 ? 1 : 0));
+    const railHoliday = usesRailHolidayTimetable(railServiceDay);
+    document.getElementById('train-daytype-badge').textContent = railHoliday ? '土日祝・予定' : '平日・予定';
+    for (const direction of ['up', 'down']) {
+        const button = document.getElementById(`train-${direction}`);
+        const active = trainDirection === direction;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+    }
+    const trains = findUpcomingTrains(now, trainDirection, 3);
+    const time = document.getElementById('train-next-time');
+    const remaining = document.getElementById('train-countdown');
+    const details = document.getElementById('train-next-detail');
+    const list = document.getElementById('train-upcoming-list');
+    list.replaceChildren();
+    if (trains.length === 0) {
+        time.textContent = '--:--';
+        remaining.textContent = '発車予定がありません';
+        details.textContent = '';
+    } else {
+        const next = trains[0];
+        const seconds = Math.max(0, Math.ceil((next.departure - now) / 1000));
+        time.textContent = formatClock(next.departure);
+        remaining.textContent = seconds >= 3600
+            ? `あと ${Math.floor(seconds / 3600)}時間${Math.floor((seconds % 3600) / 60)}分`
+            : `あと ${Math.floor(seconds / 60)}分${String(seconds % 60).padStart(2, '0')}秒`;
+        details.textContent = `${next.kind}・${next.destination}行き${next.kind === 'TJライナー' ? '（座席指定券が必要）' : ''}`;
+    }
+    for (const train of trains.slice(1)) {
+        const item = document.createElement('li');
+        const departure = document.createElement('time');
+        departure.className = 'train-upcoming-time';
+        departure.textContent = formatClock(train.departure);
+        const label = document.createElement('span');
+        label.className = 'train-upcoming-detail';
+        label.textContent = `${train.kind}・${train.destination}行き`;
+        item.append(departure, label);
+        list.appendChild(item);
+    }
+
+    const connection = document.getElementById('connection-block');
+    connection.hidden = currentDirection !== 'outbound';
+    if (currentDirection !== 'outbound') return;
+    const arrival = document.getElementById('connection-bus-arrival');
+    const suggested = document.getElementById('connection-train');
+    if (!nextBus) {
+        arrival.textContent = '本日の駅行きバスは終了しています';
+        suggested.textContent = '次の運行日にご確認ください';
+        return;
+    }
+    const stationArrival = new Date(nextBus.departure.getTime() + BUS_TO_STATION_MINUTES * 60000);
+    const platformReady = new Date(stationArrival.getTime() + STATION_TRANSFER_MINUTES * 60000);
+    const train = findUpcomingTrains(platformReady, trainDirection, 1)[0];
+    arrival.textContent = `バス ${formatClock(nextBus.departure)}発 → 駅 ${formatClock(stationArrival)}着の目安`;
+    suggested.textContent = train
+        ? `乗換候補：${formatClock(train.departure)}発 ${train.kind}（余裕約${Math.floor((train.departure - platformReady) / 60000)}分）`
+        : '乗り継ぎ候補が見つかりません';
 }
 
 function selectDaytype(daytype) {
@@ -298,6 +422,7 @@ function updateCountdown() {
 
     const foundBuses = findUpcomingBuses(now, 3);
     renderUpcoming(foundBuses.slice(1));
+    renderTrainDisplay(now, foundBuses[0]);
     const card = document.getElementById('countdown-card');
     const countdown = document.getElementById('minutes');
     const ended = document.getElementById('service-ended');

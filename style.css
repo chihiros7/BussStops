@@ -104,6 +104,43 @@ button:focus-visible { outline: 3px solid #e9a33d; outline-offset: 3px; }
 .upcoming-list .upcoming-time { font-size: 1.15rem; font-weight: 750; font-variant-numeric: tabular-nums; }
 .upcoming-list .upcoming-label { color: var(--text-muted); font-size: .85rem; }
 .upcoming-list .empty-upcoming { color: var(--text-muted); font-size: .9rem; }
+.train-section {
+    margin-top: 28px;
+    padding: 19px 16px 17px;
+    border: 1px solid var(--green-border);
+    border-radius: 19px;
+    background: #f7faf8;
+}
+.train-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+.train-eyebrow { font-size: .77rem; color: var(--text-muted); margin-bottom: 5px; }
+.train-data-badge {
+    flex: none;
+    border-radius: 999px;
+    padding: 7px 9px;
+    background: #e4ebe6;
+    color: #42634d;
+    font-size: .76rem;
+    font-weight: 750;
+}
+.train-next-card { margin-top: 14px; border-radius: 14px; padding: 16px 14px; background: #fff; border: 1px solid #e3ece6; }
+.train-next-label { font-size: .85rem; color: var(--text-muted); }
+.train-next-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px; margin: 4px 0; }
+.train-next-time { font-size: 2.4rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.35; letter-spacing: -.02em; }
+.train-countdown { color: var(--green); font-size: 1.12rem; font-weight: 750; font-variant-numeric: tabular-nums; }
+.train-next-detail { font-size: .91rem; color: #42634d; font-weight: 650; }
+.train-upcoming-list { list-style: none; padding: 0 4px; margin-top: 7px; }
+.train-upcoming-list li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 11px 0; border-bottom: 1px solid #e3ece6; }
+.train-upcoming-time { font-size: 1rem; font-weight: 750; font-variant-numeric: tabular-nums; }
+.train-upcoming-detail { font-size: .83rem; color: var(--text-muted); text-align: right; }
+.connection-block { margin-top: 17px; background: #e5f3e9; padding: 14px; border-radius: 13px; }
+.connection-heading { color: #17683f; font-size: .86rem; font-weight: 800; }
+.connection-arrival { margin-top: 9px; color: #2d5540; font-size: .9rem; }
+.connection-train { margin-top: 5px; font-size: 1.06rem; font-weight: 800; color: #185e3c; }
+.connection-note { margin-top: 9px; font-size: .78rem; line-height: 1.6; color: #526d5c; }
+.train-links { display: flex; gap: 9px; margin-top: 15px; flex-wrap: wrap; }
+.train-links a { display: inline-flex; align-items: center; min-height: 48px; border-radius: 9px; padding: 8px 11px; border: 1px solid #bbd7c6; color: #16683f; background: white; text-decoration: none; font-size: .86rem; font-weight: 750; }
+.train-links a:focus-visible { outline: 3px solid #e9a33d; outline-offset: 2px; }
+.train-source-note { margin-top: 12px; font-size: .78rem; line-height: 1.6; color: var(--text-muted); }
 .timetable-open-btn {
     display: flex;
     align-items: center;
