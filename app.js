@@ -126,6 +126,8 @@ const DIRECTION_KEY = 'bussstops-direction';
 const TRAIN_DIRECTION_KEY = 'bussstops-train-direction';
 const BUS_TO_STATION_MINUTES = 14;
 const STATION_TRANSFER_MINUTES = 5;
+const MAX_CONNECTION_WAIT_MINUTES = 120;
+const EXCLUDED_TRAIN_KINDS = new Set(['TJライナー', '普通']);
 let currentDirection = 'outbound';
 let trainDirection = 'up';
 let selectedDaytype = 'weekday';
@@ -222,7 +224,7 @@ function getRailServiceDepartures(serviceDay, direction) {
     return results;
 }
 
-function findUpcomingTrains(at, direction = trainDirection, limit = 3) {
+function findUpcomingTrains(at, direction = trainDirection, limit = 3, matches = () => true) {
     const serviceDay = new Date(at.getFullYear(), at.getMonth(), at.getDate());
     // 0～2時台の終電は前日のダイヤに属する。
     if (at.getHours() < 3) serviceDay.setDate(serviceDay.getDate() - 1);
@@ -232,7 +234,7 @@ function findUpcomingTrains(at, direction = trainDirection, limit = 3) {
         trains.push(...getRailServiceDepartures(day, direction));
     }
     return trains
-        .filter(train => train.departure.getTime() >= at.getTime())
+        .filter(train => train.departure.getTime() >= at.getTime() && matches(train))
         .sort((a, b) => a.departure - b.departure)
         .slice(0, limit);
 }
@@ -245,89 +247,83 @@ function getTransferEstimate(nextBus, direction = trainDirection) {
     if (!nextBus) return null;
     const stationArrival = new Date(nextBus.departure.getTime() + BUS_TO_STATION_MINUTES * 60000);
     const platformReady = new Date(stationArrival.getTime() + STATION_TRANSFER_MINUTES * 60000);
-    const train = findUpcomingTrains(platformReady, direction, 1)[0] ?? null;
+    const candidates = findUpcomingTrains(platformReady, direction, 2, train =>
+        !EXCLUDED_TRAIN_KINDS.has(train.kind) &&
+        train.departure.getTime() - stationArrival.getTime() <= MAX_CONNECTION_WAIT_MINUTES * 60000
+    ).map(train => ({
+        ...train,
+        waitMinutes: Math.floor((train.departure - stationArrival) / 60000),
+        bufferMinutes: Math.floor((train.departure - platformReady) / 60000)
+    }));
     return {
         stationArrival,
         platformReady,
-        train,
-        waitMinutes: train ? Math.floor((train.departure - stationArrival) / 60000) : null,
-        bufferMinutes: train ? Math.floor((train.departure - platformReady) / 60000) : null
+        candidates
     };
 }
 
 function renderTrainDisplay(now, nextBus) {
     document.getElementById('train-section').hidden = currentDirection !== 'outbound';
+    if (currentDirection !== 'outbound') return;
     const railServiceDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (now.getHours() < 3 ? 1 : 0));
     const railHoliday = usesRailHolidayTimetable(railServiceDay);
     document.getElementById('train-daytype-badge').textContent = railHoliday ? '土日祝・予定' : '平日・予定';
-    document.getElementById('train-quick-direction').textContent = trainDirection === 'up' ? '池袋方面' : '小川町方面';
     for (const direction of ['up', 'down']) {
         const button = document.getElementById(`train-${direction}`);
         const active = trainDirection === direction;
         button.classList.toggle('active', active);
         button.setAttribute('aria-pressed', String(active));
     }
-    const trains = findUpcomingTrains(now, trainDirection, 3);
-    const time = document.getElementById('train-next-time');
-    const remaining = document.getElementById('train-countdown');
-    const details = document.getElementById('train-next-detail');
-    const list = document.getElementById('train-upcoming-list');
+    const arrival = document.getElementById('train-station-arrival');
+    const list = document.getElementById('train-candidates');
     list.replaceChildren();
-    if (trains.length === 0) {
-        time.textContent = '--:--';
-        remaining.textContent = '発車予定がありません';
-        details.textContent = '';
-    } else {
-        const next = trains[0];
-        const seconds = Math.max(0, Math.ceil((next.departure - now) / 1000));
-        time.textContent = formatClock(next.departure);
-        remaining.textContent = seconds >= 3600
-            ? `あと ${Math.floor(seconds / 3600)}時間${Math.floor((seconds % 3600) / 60)}分`
-            : `あと ${Math.floor(seconds / 60)}分${String(seconds % 60).padStart(2, '0')}秒`;
-        details.textContent = `${next.kind}・${next.destination}行き${next.kind === 'TJライナー' ? '（座席指定券が必要）' : ''}`;
-    }
-    for (const train of trains.slice(1)) {
-        const item = document.createElement('li');
-        const departure = document.createElement('time');
-        departure.className = 'train-upcoming-time';
-        departure.textContent = formatClock(train.departure);
-        const label = document.createElement('span');
-        label.className = 'train-upcoming-detail';
-        label.textContent = `${train.kind}・${train.destination}行き`;
-        item.append(departure, label);
-        list.appendChild(item);
-    }
-
-    const connection = document.getElementById('connection-block');
-    connection.hidden = currentDirection !== 'outbound';
-    if (currentDirection !== 'outbound') return;
-    const arrival = document.getElementById('connection-bus-arrival');
-    const suggested = document.getElementById('connection-train');
-    const quickRoute = document.getElementById('train-quick-route');
-    const quickWait = document.getElementById('train-quick-wait');
-    const quickBuffer = document.getElementById('train-quick-buffer');
-    quickBuffer.hidden = true;
     if (!nextBus) {
-        arrival.textContent = '本日の駅行きバスは終了しています';
-        suggested.textContent = '次の運行日にご確認ください';
-        quickRoute.textContent = '本日の駅行きバスは終了しました';
-        quickWait.textContent = '電車の時刻はタップして確認';
+        arrival.textContent = '本日の駅行きバスは終了しました';
+        const item = document.createElement('li');
+        item.className = 'train-candidate-empty';
+        item.textContent = '次の運行日に乗り継ぎ候補を確認してね';
+        list.appendChild(item);
         return;
     }
     const estimate = getTransferEstimate(nextBus);
-    const { stationArrival, train, bufferMinutes, waitMinutes } = estimate;
-    arrival.textContent = `バス ${formatClock(nextBus.departure)}発 → 駅 ${formatClock(stationArrival)}着の目安`;
-    suggested.textContent = train
-        ? `乗換候補：${formatClock(train.departure)}発 ${train.kind}（余裕約${bufferMinutes}分）`
-        : '乗り継ぎ候補が見つかりません';
-    quickRoute.textContent = train
-        ? `駅 ${formatClock(stationArrival)}着見込 → 電車 ${formatClock(train.departure)}発（予定）`
-        : `駅 ${formatClock(stationArrival)}着見込 → 電車候補なし`;
-    quickWait.textContent = train ? `駅到着から約${waitMinutes}分で発車` : '候補の電車が見つかりません';
-    if (train) {
-        quickBuffer.hidden = false;
-        quickBuffer.textContent = `乗換余裕約${bufferMinutes}分`;
-        quickBuffer.classList.toggle('tight', bufferMinutes < 5);
+    arrival.textContent = `バス ${formatClock(nextBus.departure)}発 → 駅 ${formatClock(estimate.stationArrival)}着見込み（予定）`;
+    if (estimate.candidates.length === 0) {
+        const item = document.createElement('li');
+        item.className = 'train-candidate-empty';
+        item.textContent = 'この時間帯に対象の電車はありません';
+        list.appendChild(item);
+        return;
+    }
+    for (const train of estimate.candidates) {
+        const item = document.createElement('li');
+        item.className = 'train-candidate';
+        const departure = document.createElement('time');
+        departure.className = 'train-candidate-time';
+        departure.dateTime = train.departure.toISOString();
+        departure.textContent = formatClock(train.departure);
+        const departureUnit = document.createElement('small');
+        departureUnit.className = 'train-candidate-departure-unit';
+        departureUnit.textContent = '発';
+        departure.appendChild(departureUnit);
+        const route = document.createElement('span');
+        route.className = 'train-candidate-route';
+        const kind = document.createElement('span');
+        kind.className = 'train-candidate-kind';
+        kind.textContent = train.kind;
+        const destination = document.createElement('span');
+        destination.className = 'train-candidate-destination';
+        destination.textContent = `${train.destination}行き${train.departure.toDateString() !== estimate.stationArrival.toDateString() ? '・翌日' : ''}`;
+        route.append(kind, destination);
+        const buffer = document.createElement('span');
+        buffer.className = `train-candidate-buffer ${train.bufferMinutes >= 6 ? 'safe' : train.bufferMinutes >= 3 ? 'warning' : 'danger'}`;
+        const wait = document.createElement('small');
+        wait.textContent = `駅着後${train.waitMinutes}分`;
+        const bufferValue = document.createElement('strong');
+        bufferValue.textContent = `余裕${train.bufferMinutes}分`;
+        buffer.append(wait, bufferValue);
+        buffer.title = `駅到着から電車発車まで約${train.waitMinutes}分、駅構内の移動を5分と見込んだ余裕`;
+        item.append(departure, route, buffer);
+        list.appendChild(item);
     }
 }
 

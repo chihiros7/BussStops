@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#16784c">
     <meta name="description" content="パークタウン入口と東松山駅のバスの発車時刻を、わかりやすく確認できるアプリです。">
     <title>BussStops | 東松山バス</title>
-    <link rel="stylesheet" href="style.css?v=107">
+    <link rel="stylesheet" href="style.css?v=108">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -52,46 +52,29 @@
                     <ul id="upcoming-list" class="upcoming-list"><li class="empty-upcoming">確認中...</li></ul>
                 </section>
                 <section id="train-section" class="train-section" aria-labelledby="train-title">
-                    <h2 id="train-title" class="visually-hidden">東武東上線への乗り継ぎ</h2>
+                    <div class="train-compact-header">
+                        <h2 id="train-title" class="train-section-title">
+                            <svg class="train-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="16" rx="4"/><path d="M5 12h14M8 16h.01M16 16h.01M8 19l-2 3M16 19l2 3M9 6h6"/></svg>
+                            電車の乗り継ぎ
+                        </h2>
+                        <div class="train-direction-picker" role="group" aria-label="電車の方向">
+                            <button id="train-up" class="train-direction-btn" type="button" aria-pressed="true">池袋方面</button>
+                            <button id="train-down" class="train-direction-btn" type="button" aria-pressed="false">小川町方面</button>
+                        </div>
+                    </div>
+                    <p id="train-station-arrival" class="train-station-arrival">バスと駅到着の目安を計算中...</p>
+                    <ol id="train-candidates" class="train-candidates" aria-label="乗換候補の電車2本">
+                        <li class="train-candidate-empty">乗換候補を確認中...</li>
+                    </ol>
                     <button id="train-toggle" class="train-toggle" type="button" aria-expanded="false" aria-controls="train-details">
-                        <span class="train-toggle-heading">
-                            <span class="train-toggle-label">
-                                <svg class="train-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="16" rx="4"/><path d="M5 12h14M8 16h.01M16 16h.01M8 19l-2 3M16 19l2 3M9 6h6"/></svg>
-                                <span>東武東上線への乗り継ぎ</span>
-                            </span>
-                            <span class="train-toggle-direction" id="train-quick-direction">池袋方面</span>
-                            <span class="train-toggle-chevron" aria-hidden="true">⌄</span>
-                        </span>
-                        <span id="train-quick-route" class="train-quick-route">駅到着と乗換候補を計算中...</span>
-                        <span class="train-quick-bottom">
-                            <span id="train-quick-wait" class="train-quick-wait">時刻表を確認中...</span>
-                            <span id="train-quick-buffer" class="train-quick-buffer" hidden></span>
-                        </span>
+                        計算条件・公式運行情報 <span class="train-toggle-chevron" aria-hidden="true">⌄</span>
                     </button>
                     <div id="train-details" class="train-details" hidden>
                         <div class="train-heading">
-                            <p class="train-eyebrow">東松山駅発・時刻表から計算</p>
+                            <p class="train-eyebrow">時刻表に基づく予測</p>
                             <span id="train-daytype-badge" class="train-data-badge">時刻表ベース</span>
                         </div>
-                        <div class="segmented-control" role="group" aria-label="電車の方向">
-                            <button id="train-up" class="segment-btn" type="button" aria-pressed="true">池袋方面</button>
-                            <button id="train-down" class="segment-btn" type="button" aria-pressed="false">小川町方面</button>
-                        </div>
-                        <div class="train-next-card">
-                            <p class="train-next-label">いまから次の電車</p>
-                            <div class="train-next-row">
-                                <strong id="train-next-time" class="train-next-time" aria-live="off">--:--</strong>
-                                <span id="train-countdown" class="train-countdown">計算中...</span>
-                            </div>
-                            <p id="train-next-detail" class="train-next-detail">電車の情報を確認中...</p>
-                        </div>
-                        <ul id="train-upcoming-list" class="train-upcoming-list" aria-label="そのあとの電車"></ul>
-                        <div id="connection-block" class="connection-block">
-                            <p class="connection-heading">このバスからの乗り継ぎ目安</p>
-                            <p id="connection-bus-arrival" class="connection-arrival">駅への到着目安を計算中...</p>
-                            <p id="connection-train" class="connection-train">乗れる電車を確認中...</p>
-                            <p class="connection-note">バス約14分＋駅構内の移動約5分で試算。道路状況などで変わるため、乗り継ぎ保証ではありません。</p>
-                        </div>
+                        <p class="connection-note">TJライナー・普通列車は除外。バス約14分＋駅構内の移動約5分で計算し、駅到着から2時間以内の候補を表示します。道路状況などで変わるため、乗り継ぎ保証ではありません。</p>
                         <div class="train-links">
                             <a href="https://www.tobu.co.jp/railway/guide/station/info/7408.html" target="_blank" rel="noopener noreferrer">公式の駅時刻表</a>
                             <a href="https://www.tobu.co.jp/service_status/" target="_blank" rel="noopener noreferrer">最新の運行情報</a>
@@ -106,7 +89,7 @@
                     </button>
                     <button id="refresh-btn" class="refresh-btn" type="button"><span aria-hidden="true">↻</span> 更新</button>
                 </div>
-                <p class="app-version">ver 1.07</p>
+                <p class="app-version">ver 1.08</p>
             </section>
             <section id="timetable-view" class="screen timetable-screen" aria-labelledby="timetable-title" hidden>
                 <div class="timetable-heading">
@@ -140,7 +123,7 @@
             </section>
         </main>
     </div>
-    <script src="train-data.js?v=107"></script>
-    <script src="app.js?v=107"></script>
+    <script src="train-data.js?v=108"></script>
+    <script src="app.js?v=108"></script>
 </body>
 </html>

@@ -118,19 +118,32 @@ button:focus-visible { outline: 3px solid #e9a33d; outline-offset: 3px; }
     background: #f7faf8;
     overflow: hidden;
 }
-.train-toggle { display: block; width: 100%; padding: 12px 13px; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
-.train-toggle-heading { display: flex; align-items: center; gap: 7px; min-width: 0; }
-.train-toggle-label { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-size: .88rem; font-weight: 800; }
+.train-compact-header { display: flex; justify-content: space-between; align-items: center; gap: 7px; padding: 10px 11px 0; }
+.train-section-title { display: flex; align-items: center; gap: 5px; flex: none; font-size: .86rem; font-weight: 800; }
 .train-icon { width: 19px; height: 19px; color: var(--green); flex: none; }
-.train-toggle-direction { margin-left: auto; flex: none; font-size: .72rem; color: var(--text-muted); }
-.train-toggle-chevron { font-size: 1.55rem; line-height: 1; color: var(--text-muted); transition: transform .2s ease; }
+.train-direction-picker { display: flex; align-items: center; gap: 3px; padding: 3px; border-radius: 10px; background: #eaf1ec; }
+.train-direction-btn { flex: none; min-height: 34px; padding: 6px 8px; border: 0; border-radius: 8px; background: transparent; color: #547261; font-size: .73rem; font-weight: 750; cursor: pointer; white-space: nowrap; }
+.train-direction-btn.active { background: var(--green); color: #fff; }
+.train-station-arrival { padding: 5px 12px 6px; color: var(--text-muted); font-size: .77rem; font-variant-numeric: tabular-nums; }
+.train-candidates { list-style: none; margin: 0; padding: 0 11px; }
+.train-candidate { display: flex; align-items: center; gap: 8px; padding: 9px 3px; border-top: 1px solid var(--green-border); min-height: 56px; }
+.train-candidate:first-child { border-top: 0; background: #ecf6ef; border-radius: 10px; padding: 9px; }
+.train-candidate-time { font-size: 1.43rem; font-weight: 850; letter-spacing: -.025em; font-variant-numeric: tabular-nums; flex: none; }
+.train-candidate-departure-unit { margin-left: 2px; font-size: .69rem; font-weight: 700; }
+.train-candidate-route { display: flex; flex: 1; flex-direction: column; gap: 1px; min-width: 0; }
+.train-candidate-kind { font-size: .85rem; font-weight: 800; color: var(--green-dark); white-space: nowrap; }
+.train-candidate-destination { font-size: .72rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.train-candidate-buffer { display: flex; flex: none; flex-direction: column; align-items: center; gap: 1px; border-radius: 9px; padding: 4px 6px; font-size: .74rem; white-space: nowrap; }
+.train-candidate-buffer small { font-size: .69rem; font-weight: 650; }
+.train-candidate-buffer strong { font-size: .73rem; font-weight: 800; }
+.train-candidate-buffer.safe { background: #daeee1; color: #16683f; }
+.train-candidate-buffer.warning { background: #fff0d5; color: #92520e; }
+.train-candidate-buffer.danger { background: #fbe2e0; color: #a13229; }
+.train-candidate-empty { padding: 14px 3px; color: var(--text-muted); font-size: .85rem; }
+.train-toggle { display: flex; align-items: center; justify-content: center; gap: 5px; width: 100%; min-height: 34px; padding: 7px 10px; border: 0; border-top: 1px solid var(--green-border); background: transparent; color: var(--text-muted); font-size: .76rem; cursor: pointer; }
+.train-toggle-chevron { font-size: 1.3rem; line-height: 1; transition: transform .2s ease; }
 .train-toggle[aria-expanded="true"] .train-toggle-chevron { transform: rotate(180deg); }
-.train-quick-route { display: block; margin-top: 9px; font-size: .81rem; color: #4b6555; font-variant-numeric: tabular-nums; }
-.train-quick-bottom { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 3px; }
-.train-quick-wait { font-size: .98rem; font-weight: 800; color: #185e3c; }
-.train-quick-buffer { flex: none; padding: 4px 7px; border-radius: 999px; background: #def0e3; color: #185e3c; font-size: .74rem; font-weight: 750; }
-.train-quick-buffer.tight { background: #fff0db; color: #92520e; }
-.train-details { padding: 14px 13px 16px; border-top: 1px solid var(--green-border); }
+.train-details { padding: 12px 13px 16px; border-top: 1px solid var(--green-border); }
 .train-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .train-eyebrow { font-size: .77rem; color: var(--text-muted); }
 .train-data-badge {
@@ -142,21 +155,7 @@ button:focus-visible { outline: 3px solid #e9a33d; outline-offset: 3px; }
     font-size: .76rem;
     font-weight: 750;
 }
-.train-next-card { margin-top: 12px; border-radius: 12px; padding: 12px; background: #fff; border: 1px solid #e3ece6; }
-.train-next-label { font-size: .85rem; color: var(--text-muted); }
-.train-next-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px; margin: 4px 0; }
-.train-next-time { font-size: 2rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.35; letter-spacing: -.02em; }
-.train-countdown { color: var(--green); font-size: 1.12rem; font-weight: 750; font-variant-numeric: tabular-nums; }
-.train-next-detail { font-size: .91rem; color: #42634d; font-weight: 650; }
-.train-upcoming-list { list-style: none; padding: 0 4px; margin-top: 7px; }
-.train-upcoming-list li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 11px 0; border-bottom: 1px solid #e3ece6; }
-.train-upcoming-time { font-size: 1rem; font-weight: 750; font-variant-numeric: tabular-nums; }
-.train-upcoming-detail { font-size: .83rem; color: var(--text-muted); text-align: right; }
-.connection-block { margin-top: 17px; background: #e5f3e9; padding: 14px; border-radius: 13px; }
-.connection-heading { color: #17683f; font-size: .86rem; font-weight: 800; }
-.connection-arrival { margin-top: 9px; color: #2d5540; font-size: .9rem; }
-.connection-train { margin-top: 5px; font-size: 1.06rem; font-weight: 800; color: #185e3c; }
-.connection-note { margin-top: 9px; font-size: .78rem; line-height: 1.6; color: #526d5c; }
+.connection-note { font-size: .78rem; line-height: 1.6; color: #526d5c; }
 .train-links { display: flex; gap: 9px; margin-top: 15px; flex-wrap: wrap; }
 .train-links a { display: inline-flex; align-items: center; min-height: 48px; border-radius: 9px; padding: 8px 11px; border: 1px solid #bbd7c6; color: #16683f; background: white; text-decoration: none; font-size: .86rem; font-weight: 750; }
 .train-links a:focus-visible { outline: 3px solid #e9a33d; outline-offset: 2px; }
