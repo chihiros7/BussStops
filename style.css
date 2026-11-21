@@ -1,234 +1,151 @@
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
 :root {
-    --text-normal: #222222;  /* 通常時：おちついた黒 */
-    --text-soon: #2e7d32;    /* 10分以内：安心の緑 */
-    --text-urgent: #d32f2f;  /* 3分以内：急げの赤 */
-    --text-ended: #757575;   /* 運行終了：グレー */
+    color-scheme: light;
+    --green: #16784c;
+    --green-dark: #244a36;
+    --green-light: #e6f3ea;
+    --green-pale: #f0f7f2;
+    --green-border: #d8e8de;
+    --text-muted: #617568;
+    --orange: #99500c;
+    --gray: #66736c;
 }
-
+* { box-sizing: border-box; }
+body, h1, h2, h3, p, ul { margin: 0; }
+button { font: inherit; }
+[hidden] { display: none !important; }
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    height: 100vh;
-    background-color: #ffffff; /* 背景は白固定 */
-    color: #222222;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--green-pale);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", sans-serif;
+    color: var(--green-dark);
+    -webkit-font-smoothing: antialiased;
 }
-
-.container {
+.app-shell {
     width: 100%;
-    max-width: 500px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 40px 20px;
-    text-align: center;
+    max-width: 460px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0 auto;
+    padding: calc(22px + env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
+    background: #fff;
 }
-
-/* 📍 上部：バス停情報 */
-.bus-info h2 {
-    font-size: 1.6rem;
-    font-weight: bold;
-    color: #111111;
+@media (min-width: 580px) {
+    .app-shell { box-shadow: 0 14px 52px rgba(27, 74, 48, .10); }
 }
-.arrow {
-    font-size: 1.1rem;
-    color: #666666;
-    margin-top: 5px;
+.app-header { display: flex; align-items: center; gap: 11px; margin-bottom: 26px; }
+.brand-icon {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    flex: none;
+    color: #fff;
+    background: var(--green);
+    border-radius: 13px;
 }
-
-/* 🌟 中央：大きな文字の「あと◯分◯秒」 */
-.countdown-area {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
+.brand-icon svg { width: 27px; height: 27px; }
+.brand-copy h1 { font-size: 1.24rem; line-height: 1.3; letter-spacing: -.015em; }
+.brand-copy p { margin-top: 2px; font-size: .8rem; color: var(--text-muted); }
+.screen { width: 100%; }
+.today-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 23px; }
+.today-date { color: var(--text-muted); font-size: .9rem; }
+.daytype-badge {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: var(--green-light);
+    color: #16683f;
+    font-weight: 700;
+    font-size: .78rem;
+    white-space: nowrap;
 }
-
-.minutes {
-    font-size: min(9vw, 3.6rem); 
-    font-weight: 900;
-    line-height: 1;
-    margin-bottom: 15px;
-    transition: color 0.3s ease;
-    color: var(--text-normal);
-    white-space: nowrap; /* 改行を絶対に禁止 */
-}
-
-/* 予定時刻表示 */
-.schedule-details {
-    font-size: 1.3rem;
-    font-weight: bold;
-    color: #444444;
-}
-
-/* 🔄 下部：タブ切り替え */
-.bottom-nav {
-    margin-bottom: 10px;
-}
-
-.tabs {
-    display: flex;
-    background: #f0f0f0;
-    border-radius: 12px;
-    padding: 4px;
-    margin-bottom: 15px;
-    border: 1px solid #e0e0e0;
-}
-
-.tab-btn {
+.field-block { margin-bottom: 22px; }
+.section-label { font-size: .9rem; font-weight: 700; margin-bottom: 9px; }
+.segmented-control { display: flex; gap: 4px; border-radius: 13px; background: #eff4f0; padding: 4px; }
+.segment-btn {
     flex: 1;
-    border: none;
-    background: none;
-    color: #666666;
-    padding: 15px 10px;
-    font-size: 1.05rem;
-    font-weight: bold;
-    border-radius: 9px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.tab-btn.active {
-    background: #222222;
-    color: #ffffff;
-}
-
-/* 更新ボタン */
-.refresh-btn {
-    width: 100%;
-    background-color: #ffffff;
-    color: #333333;
-    border: 1px solid #cccccc;
-    padding: 14px;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: bold;
-    cursor: pointer;
-}
-.refresh-btn:active {
-    background-color: #f5f5f5;
-}
-
-.timetable-open-btn {
-    width: 100%;
-    background: #222222;
-    color: white;
-    border: none;
-    padding: 14px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    font-size: 1rem;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.timetable-overlay[hidden] { display: none; }
-.timetable-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 10;
-    padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.timetable-card {
-    width: min(100%, 500px);
-    max-height: 100%;
-    background: white;
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
-    text-align: left;
-    overflow: hidden;
-}
-
-.timetable-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.timetable-heading h2 { font-size: 1.35rem; }
-.timetable-close {
-    padding: 4px 8px;
-    font-size: 2rem;
-    background: transparent;
+    min-width: 0;
+    min-height: 48px;
     border: 0;
-    cursor: pointer;
-    line-height: 1;
-}
-
-.timetable-route {
-    color: #555555;
-    font-size: 0.85rem;
-    margin-top: 6px;
-}
-
-.timetable-direction {
-    display: flex;
-    gap: 8px;
-    margin: 12px 0;
-}
-
-.timetable-direction-btn {
-    flex: 1;
-    background: #f1f1f1;
-    border: 1px solid #dddddd;
-    border-radius: 8px;
-    padding: 10px 6px;
-    font-weight: bold;
+    border-radius: 10px;
+    background: transparent;
+    color: #4c6858;
+    font-size: 1rem;
+    font-weight: 700;
     cursor: pointer;
 }
-
-.timetable-direction-btn.active {
-    background: #222222;
-    border-color: #222222;
-    color: #ffffff;
-}
-
-.timetable-scroll { overflow-y: auto; min-height: 0; }
-.timetable-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.91rem;
+.segment-btn.active { background: var(--green); color: #fff; box-shadow: 0 2px 6px rgba(21, 98, 60, .15); }
+button:focus-visible { outline: 3px solid #e9a33d; outline-offset: 3px; }
+.countdown-card {
+    border-radius: 22px;
+    padding: 22px 18px 20px;
+    background: var(--green);
+    color: #fff;
     text-align: center;
-    font-variant-numeric: tabular-nums;
+    transition: background-color .2s ease;
 }
-
-.timetable-table th, .timetable-table td {
-    padding: 9px 5px;
-    border-bottom: 1px solid #e9e9e9;
+.countdown-card.is-urgent { background: var(--orange); }
+.countdown-card.is-ended { background: var(--gray); }
+.route-line { font-size: .92rem; font-weight: 650; line-height: 1.5; color: #e1f6e9; }
+.countdown-status { margin-top: 25px; font-size: 1rem; color: #e1f6e9; }
+.countdown-time { display: flex; justify-content: center; align-items: baseline; gap: 4px; margin: 7px 0 8px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.remaining-minutes { font-size: clamp(3.3rem, 15vw, 5rem); font-weight: 800; letter-spacing: -.055em; line-height: 1.2; }
+.minutes-unit { font-size: 1.6rem; font-weight: 700; margin-right: 7px; }
+.remaining-seconds { font-size: 2rem; font-weight: 700; }
+.seconds-unit { font-size: 1.06rem; font-weight: 700; }
+.service-ended { font-size: 2.8rem; font-weight: 800; margin: 28px 0 16px; }
+.next-departure { font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.schedule-disclaimer { margin-top: 20px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.25); font-size: .8rem; color: #e1f6e9; }
+.upcoming-section { margin-top: 26px; }
+.section-title { font-size: 1.04rem; font-weight: 800; }
+.upcoming-list { list-style: none; padding: 0; margin-top: 8px; }
+.upcoming-list li { display: flex; align-items: center; justify-content: space-between; min-height: 53px; padding: 11px 4px; border-bottom: 1px solid #e3ece6; }
+.upcoming-list .upcoming-time { font-size: 1.15rem; font-weight: 750; font-variant-numeric: tabular-nums; }
+.upcoming-list .upcoming-label { color: var(--text-muted); font-size: .85rem; }
+.upcoming-list .empty-upcoming { color: var(--text-muted); font-size: .9rem; }
+.timetable-open-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 60px;
+    margin-top: 22px;
+    padding: 13px 16px;
+    border: 1px solid var(--green-border);
+    border-radius: 14px;
+    background: var(--green-light);
+    color: #16683f;
+    font-size: 1.02rem;
+    font-weight: 800;
+    cursor: pointer;
 }
-
-.timetable-table thead th {
-    position: sticky;
-    top: 0;
-    background: #f5f5f5;
-    z-index: 1;
+.button-content { display: flex; align-items: center; gap: 11px; }
+.button-content svg { width: 23px; height: 23px; }
+.button-chevron { font-size: 1.7rem; line-height: 1; }
+.refresh-btn { display: block; margin: 10px auto 0; padding: 12px 18px; min-height: 48px; background: transparent; color: var(--text-muted); border: 0; cursor: pointer; font-size: .88rem; }
+.app-version { margin-top: 10px; text-align: center; font-size: .75rem; color: #9aaba0; }
+.timetable-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.timetable-heading h2 { font-size: 1.5rem; }
+.back-btn { width: 48px; height: 48px; border: 0; border-radius: 12px; background: var(--green-light); color: var(--green); font-size: 2rem; cursor: pointer; line-height: 1; }
+.timetable-route-card { padding: 16px; border-radius: 14px; background: var(--green-pale); margin-bottom: 20px; }
+.route-caption { font-size: .87rem; color: var(--text-muted); margin-bottom: 5px; }
+.timetable-route { font-size: 1.06rem; font-weight: 800; }
+.timetable-screen .field-block { margin-bottom: 18px; }
+.timetable-list-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 22px 0 10px; }
+.timetable-today-off { background: #f0f2f0; color: #576b5e; }
+.timetable-hours { display: grid; gap: 3px; }
+.hour-row { display: flex; align-items: center; gap: 13px; min-height: 62px; padding: 9px 10px; border-radius: 10px; }
+.hour-row:nth-child(odd) { background: #f5f9f6; }
+.hour-label { width: 49px; flex: none; font-size: .99rem; font-weight: 750; color: #506b58; }
+.minute-list { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+.minute-chip { min-width: 43px; text-align: center; padding: 9px 6px; border-radius: 8px; background: #eaf2ed; color: #16683f; font-size: 1rem; font-weight: 750; font-variant-numeric: tabular-nums; }
+.minute-chip.next { background: #cdebd8; outline: 2px solid #7abd95; }
+.timetable-note { margin: 20px 0; font-size: .84rem; line-height: 1.65; color: var(--text-muted); }
+@media (max-width: 360px) {
+    .app-shell { padding-left: 15px; padding-right: 15px; }
+    .countdown-card { padding-left: 10px; padding-right: 10px; }
+    .route-line { font-size: .82rem; }
+    .remaining-minutes { font-size: 3.1rem; }
 }
-
-.timetable-table .today { background: #eaf6ed; }
-.timetable-table thead .today { background: #d9eede; }
-.timetable-table th:first-child { width: 12%; }
-.timetable-table td { width: 44%; }
-.timetable-note {
-    font-size: 0.73rem;
-    line-height: 1.5;
-    color: #666666;
-    margin-top: 10px;
-}
+@media (prefers-reduced-motion: reduce) { .countdown-card { transition: none; } }

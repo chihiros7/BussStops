@@ -3,8 +3,8 @@
   "short_name": "東松山バス",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#f0f7f2",
+  "theme_color": "#16784c",
   "orientation": "portrait",
   "icons": [
     {

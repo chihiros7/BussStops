@@ -121,159 +121,209 @@ function usesHolidayTimetable(date) {
     return japaneseHolidays[date.getFullYear()]?.has(mmdd) ?? false;
 }
 
-let currentDirection = "outbound";
-let timerId = null;
+// 初回は「駅へ行く」。以降はユーザーが最後に選んだ方向を使う。
+const DIRECTION_KEY = 'bussstops-direction';
+let currentDirection = 'outbound';
+let selectedDaytype = 'weekday';
 
 window.addEventListener('DOMContentLoaded', () => {
-    const now = new Date();
-    if (now.getHours() < 12) {
-        currentDirection = "outbound";
-    } else {
-        currentDirection = "inbound";
+    try {
+        const saved = localStorage.getItem(DIRECTION_KEY);
+        if (saved === 'outbound' || saved === 'inbound') currentDirection = saved;
+    } catch (_) {
+        // ストレージが無効でも時刻表は利用できる。
     }
 
+    selectedDaytype = usesHolidayTimetable(new Date()) ? 'holiday' : 'weekday';
     document.getElementById('tab-outbound').addEventListener('click', () => switchDirection('outbound'));
     document.getElementById('tab-inbound').addEventListener('click', () => switchDirection('inbound'));
     document.getElementById('refresh-btn').addEventListener('click', updateCountdown);
 
-    const timetableModal = document.getElementById('timetable-modal');
     document.getElementById('timetable-open').addEventListener('click', () => {
+        selectedDaytype = usesHolidayTimetable(new Date()) ? 'holiday' : 'weekday';
         renderTimetable();
-        timetableModal.hidden = false;
+        document.getElementById('home-view').hidden = true;
+        document.getElementById('timetable-view').hidden = false;
+        window.scrollTo(0, 0);
         document.getElementById('timetable-close').focus();
     });
     document.getElementById('timetable-close').addEventListener('click', closeTimetable);
     document.getElementById('timetable-outbound').addEventListener('click', () => switchDirection('outbound'));
     document.getElementById('timetable-inbound').addEventListener('click', () => switchDirection('inbound'));
-    timetableModal.addEventListener('click', (event) => {
-        if (event.target === timetableModal) closeTimetable();
-    });
+    document.getElementById('timetable-weekday').addEventListener('click', () => selectDaytype('weekday'));
+    document.getElementById('timetable-holiday').addEventListener('click', () => selectDaytype('holiday'));
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && !timetableModal.hidden) closeTimetable();
+        if (event.key === 'Escape' && !document.getElementById('timetable-view').hidden) closeTimetable();
     });
-
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) updateCountdown();
+    });
     updateCountdown();
-    timerId = setInterval(updateCountdown, 1000);
+    setInterval(updateCountdown, 1000);
 });
 
 function switchDirection(direction) {
     currentDirection = direction;
+    try { localStorage.setItem(DIRECTION_KEY, direction); } catch (_) { /* 保存不可でも動作する */ }
     updateCountdown();
-    if (!document.getElementById('timetable-modal').hidden) renderTimetable();
+    if (!document.getElementById('timetable-view').hidden) renderTimetable();
+}
+
+function selectDaytype(daytype) {
+    selectedDaytype = daytype;
+    renderTimetable();
 }
 
 function closeTimetable() {
-    document.getElementById('timetable-modal').hidden = true;
+    document.getElementById('timetable-view').hidden = true;
+    document.getElementById('home-view').hidden = false;
+    window.scrollTo(0, 0);
+    updateCountdown();
     document.getElementById('timetable-open').focus();
+}
+
+function formatTime(bus) {
+    return `${String(bus.hour).padStart(2, '0')}:${String(bus.min).padStart(2, '0')}`;
+}
+
+function findUpcomingBuses(now, limit = 3) {
+    const timetable = timetableData[currentDirection].timetable[usesHolidayTimetable(now) ? 'holiday' : 'weekday'];
+    const buses = [];
+    for (let hour = now.getHours(); hour <= 23 && buses.length < limit; hour++) {
+        for (const min of timetable[String(hour)] ?? []) {
+            const departure = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, min);
+            if (departure.getTime() >= now.getTime()) {
+                buses.push({ hour, min, departure });
+                if (buses.length === limit) break;
+            }
+        }
+    }
+    return buses;
 }
 
 function renderTimetable() {
     const activeData = timetableData[currentDirection];
-    document.getElementById('timetable-route').textContent =
-        `${activeData.departure} → ${activeData.destination.replace(/\s*行$/, '')}`;
-
+    document.getElementById('timetable-departure').textContent = `${activeData.departure} 発`;
+    document.getElementById('timetable-route').textContent = activeData.destination.replace(/\s*行$/, '') + '行き';
     for (const direction of ['outbound', 'inbound']) {
         const button = document.getElementById(`timetable-${direction}`);
         const isActive = direction === currentDirection;
         button.classList.toggle('active', isActive);
         button.setAttribute('aria-pressed', String(isActive));
     }
+    for (const daytype of ['weekday', 'holiday']) {
+        const button = document.getElementById(`timetable-${daytype}`);
+        const isActive = daytype === selectedDaytype;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+    }
 
-    const isHoliday = usesHolidayTimetable(new Date());
-    document.getElementById('weekday-header').classList.toggle('today', !isHoliday);
-    document.getElementById('holiday-header').classList.toggle('today', isHoliday);
-
-    const tbody = document.getElementById('timetable-body');
-    tbody.replaceChildren();
+    const now = new Date();
+    const todayType = usesHolidayTimetable(now) ? 'holiday' : 'weekday';
+    const todayBadge = document.getElementById('timetable-today-badge');
+    const isToday = selectedDaytype === todayType;
+    todayBadge.textContent = isToday ? '今日のダイヤ' : '別のダイヤを表示中';
+    todayBadge.classList.toggle('timetable-today-off', !isToday);
+    const next = findUpcomingBuses(now, 1)[0];
+    const list = document.getElementById('timetable-body');
+    list.replaceChildren();
     for (let hour = 5; hour <= 22; hour++) {
-        const weekdayTimes = activeData.timetable.weekday[String(hour)] ?? [];
-        const holidayTimes = activeData.timetable.holiday[String(hour)] ?? [];
-        if (weekdayTimes.length === 0 && holidayTimes.length === 0) continue;
+        const times = activeData.timetable[selectedDaytype][String(hour)] ?? [];
+        if (times.length === 0) continue;
 
-        const tr = document.createElement('tr');
-        const hourCell = document.createElement('th');
-        hourCell.scope = 'row';
-        hourCell.textContent = `${hour}時`;
-        tr.appendChild(hourCell);
+        const row = document.createElement('div');
+        row.className = 'hour-row';
+        const hourLabel = document.createElement('span');
+        hourLabel.className = 'hour-label';
+        hourLabel.textContent = `${hour}時`;
+        row.appendChild(hourLabel);
 
-        for (const [times, currentDay] of [[weekdayTimes, !isHoliday], [holidayTimes, isHoliday]]) {
-            const cell = document.createElement('td');
-            cell.textContent = times.length ? times.map(m => String(m).padStart(2, '0')).join('・') : '—';
-            cell.classList.toggle('today', currentDay);
-            tr.appendChild(cell);
+        const minutes = document.createElement('div');
+        minutes.className = 'minute-list';
+        for (const min of times) {
+            const chip = document.createElement('span');
+            chip.className = 'minute-chip';
+            chip.textContent = String(min).padStart(2, '0');
+            if (isToday && next && next.hour === hour && next.min === min) {
+                chip.classList.add('next');
+                chip.title = '次のバス';
+            }
+            minutes.appendChild(chip);
         }
-        tbody.appendChild(tr);
+        row.appendChild(minutes);
+        list.appendChild(row);
     }
 }
 
+function renderUpcoming(buses) {
+    const list = document.getElementById('upcoming-list');
+    list.replaceChildren();
+    if (buses.length === 0) {
+        const empty = document.createElement('li');
+        empty.className = 'empty-upcoming';
+        empty.textContent = '本日の後続便はありません';
+        list.appendChild(empty);
+        return;
+    }
+    buses.forEach((bus, index) => {
+        const row = document.createElement('li');
+        const time = document.createElement('time');
+        time.className = 'upcoming-time';
+        time.textContent = formatTime(bus);
+        const label = document.createElement('span');
+        label.className = 'upcoming-label';
+        label.textContent = index === 0 ? '次の次' : '3本目';
+        row.append(time, label);
+        list.appendChild(row);
+    });
+}
+
 function updateCountdown() {
-    document.getElementById('tab-outbound').classList.toggle('active', currentDirection === 'outbound');
-    document.getElementById('tab-inbound').classList.toggle('active', currentDirection === 'inbound');
+    for (const direction of ['outbound', 'inbound']) {
+        const button = document.getElementById(`tab-${direction}`);
+        const active = currentDirection === direction;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+    }
 
     const activeData = timetableData[currentDirection];
-    document.getElementById('departure-station').innerText = activeData.departure;
-    document.getElementById('destination-station').innerText = `↓ ${activeData.destination}`;
+    document.getElementById('departure-station').textContent = activeData.departure;
+    document.getElementById('destination-station').textContent = activeData.destination.replace(/\s*行$/, '');
 
     const now = new Date();
     const type = usesHolidayTimetable(now) ? 'holiday' : 'weekday';
+    document.getElementById('date-label').textContent =
+        new Intl.DateTimeFormat('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' }).format(now);
+    document.getElementById('daytype-label').textContent = type === 'holiday' ? '土日祝ダイヤ' : '平日ダイヤ';
 
-    const currentHour = now.getHours();
-    const currentMin = now.getMinutes();
-
-    let foundBuses = [];
-    let searchHour = currentHour;
-    
-    while (searchHour <= 23 && foundBuses.length < 2) {
-        const mins = activeData.timetable[type][searchHour.toString()];
-        if (mins) {
-            for (let m of mins) {
-                if (searchHour > currentHour || m >= currentMin) {
-                    foundBuses.push({ hour: searchHour, min: m });
-                    if (foundBuses.length >= 2) break;
-                }
-            }
-        }
-        searchHour++;
-    }
-
-    const minText = document.getElementById('minutes');
+    const foundBuses = findUpcomingBuses(now, 3);
+    renderUpcoming(foundBuses.slice(1));
+    const card = document.getElementById('countdown-card');
+    const countdown = document.getElementById('minutes');
+    const ended = document.getElementById('service-ended');
+    const status = document.getElementById('countdown-status');
     const detailsText = document.getElementById('schedule-details');
-
+    card.classList.remove('is-urgent', 'is-ended');
     if (foundBuses.length === 0) {
-        minText.innerText = "運行終了";
-        minText.style.color = 'var(--text-ended)';
-        detailsText.innerText = "本日のバスは終了しました";
+        countdown.hidden = true;
+        ended.hidden = false;
+        status.textContent = '本日の運行';
+        detailsText.textContent = '本日のバスは終了しました';
+        card.classList.add('is-ended');
         return;
     }
 
     const nextBus = foundBuses[0];
-    const nextBusTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), nextBus.hour, nextBus.min, 0);
-    const diffMs = nextBusTime.getTime() - now.getTime();
-    
-    if (diffMs <= 0) {
-        minText.innerText = "まもなく発車";
-        return;
-    }
-
-    const totalSeconds = Math.floor(diffMs / 1000);
-    const displayMins = Math.floor(totalSeconds / 60);
-    const displaySecs = totalSeconds % 60;
-
-    minText.innerText = `あと ${displayMins} 分 ${displaySecs} 秒`;
-    
-    let detailsString = `次発 ${nextBus.hour}:${nextBus.min.toString().padStart(2, '0')}`;
-    if (foundBuses[1]) {
-        detailsString += `  /  次々発 ${foundBuses[1].hour}:${foundBuses[1].min.toString().padStart(2, '0')}`;
-    }
-    detailsText.innerText = detailsString;
-
-    let textColor = 'var(--text-normal)';
+    const totalSeconds = Math.max(0, Math.ceil((nextBus.departure.getTime() - now.getTime()) / 1000));
+    countdown.hidden = false;
+    ended.hidden = true;
+    document.getElementById('remaining-minutes').textContent = String(Math.floor(totalSeconds / 60));
+    document.getElementById('remaining-seconds').textContent = String(totalSeconds % 60).padStart(2, '0');
+    status.textContent = totalSeconds <= 180 ? 'まもなく発車' : '次のバスまで';
+    detailsText.textContent = `${formatTime(nextBus)} 発`;
     if (totalSeconds <= 180) {
-        textColor = 'var(--text-urgent)';
-    } else if (totalSeconds <= 600) {
-        textColor = 'var(--text-soon)';
+        card.classList.add('is-urgent');
     }
-    minText.style.color = textColor;
 }
 
 if ('serviceWorker' in navigator) {

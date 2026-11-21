@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>バスあと何分？</title>
+    <meta name="theme-color" content="#16784c">
+    <meta name="description" content="パークタウン入口と東松山駅のバスの発車時刻を、わかりやすく確認できるアプリです。">
+    <title>BussStops | 東松山バス</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,51 +13,82 @@
     <link rel="apple-touch-icon" href="icon-512.png">
 </head>
 <body>
-    <div class="container">
-        
-        <div class="bus-info">
-            <h2 id="departure-station">--</h2>
-            <div id="destination-station" class="arrow">↓ -- 行</div>
-        </div>
-
-        <div class="countdown-area">
-            <div id="minutes" class="minutes">計算中...</div>
-            <div id="schedule-details" class="schedule-details">次発: --:--</div>
-        </div>
-
-        <div class="bottom-nav">
-            <div class="tabs">
-                <button id="tab-outbound" class="tab-btn">行き (駅方面)</button>
-                <button id="tab-inbound" class="tab-btn">帰り (パーク方面)</button>
+    <div class="app-shell">
+        <header class="app-header">
+            <div class="brand-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="3" width="14" height="16" rx="3"></rect>
+                    <path d="M5 11h14M8 16h.01M16 16h.01M8 19v2M16 19v2M9 6h6"></path>
+                </svg>
             </div>
-            <button id="timetable-open" class="timetable-open-btn" type="button">時刻表を見る</button>
-            <button id="refresh-btn" class="refresh-btn">最新の状態に更新</button>
-            
-            <div style="font-size: 0.75rem; color: #bbbbbb; margin-top: 12px; text-align: right; padding-right: 5px; letter-spacing: 0.05em;">
-                ver 1.02
-            </div>
-        </div>
-
-    </div>
-    <div id="timetable-modal" class="timetable-overlay" role="dialog" aria-modal="true" aria-labelledby="timetable-title" hidden>
-        <div class="timetable-card">
-            <div class="timetable-heading">
-                <h2 id="timetable-title">時刻表</h2>
-                <button id="timetable-close" class="timetable-close" type="button" aria-label="時刻表を閉じる">×</button>
-            </div>
-            <p id="timetable-route" class="timetable-route"></p>
-            <div class="timetable-direction" role="group" aria-label="表示する方向">
-                <button id="timetable-outbound" class="timetable-direction-btn" type="button">行き（駅方面）</button>
-                <button id="timetable-inbound" class="timetable-direction-btn" type="button">帰り（パーク方面）</button>
-            </div>
-            <div class="timetable-scroll">
-                <table class="timetable-table">
-                    <thead><tr><th scope="col">時</th><th scope="col" id="weekday-header">平日</th><th scope="col" id="holiday-header">土日祝</th></tr></thead>
-                    <tbody id="timetable-body"></tbody>
-                </table>
-            </div>
-            <p class="timetable-note">時刻は発車予定時刻です。祝日・お盆・年末年始は土日祝ダイヤで運行します。ダイヤ改正や道路状況によって変わる場合があります。</p>
-        </div>
+            <div class="brand-copy"><h1>BussStops</h1><p>東松山バスの発車案内</p></div>
+        </header>
+        <main>
+            <section id="home-view" class="screen home-screen" aria-label="次のバス">
+                <div class="today-bar">
+                    <span id="date-label" class="today-date">日付を確認中...</span>
+                    <span id="daytype-label" class="daytype-badge">ダイヤを確認中</span>
+                </div>
+                <div class="field-block">
+                    <h2 class="section-label">乗る方向</h2>
+                    <div class="segmented-control" role="group" aria-label="乗る方向">
+                        <button id="tab-outbound" type="button" class="segment-btn" aria-pressed="true">駅へ行く</button>
+                        <button id="tab-inbound" type="button" class="segment-btn" aria-pressed="false">帰る</button>
+                    </div>
+                </div>
+                <section id="countdown-card" class="countdown-card" aria-label="次のバスまでの時間">
+                    <p class="route-line"><span id="departure-station">パークタウン入口</span><span aria-hidden="true"> → </span><span id="destination-station">東松山駅〔東口〕</span></p>
+                    <p id="countdown-status" class="countdown-status">次のバスまで</p>
+                    <div id="minutes" class="countdown-time" role="timer" aria-live="off">
+                        <span id="remaining-minutes" class="remaining-minutes">--</span><span class="minutes-unit">分</span>
+                        <span id="remaining-seconds" class="remaining-seconds">--</span><span class="seconds-unit">秒</span>
+                    </div>
+                    <div id="service-ended" class="service-ended" hidden>運行終了</div>
+                    <p id="schedule-details" class="next-departure">次発 --:--</p>
+                    <p class="schedule-disclaimer">時刻表に基づく予定時刻です</p>
+                </section>
+                <section class="upcoming-section" aria-labelledby="upcoming-title">
+                    <h2 id="upcoming-title" class="section-title">このあとのバス</h2>
+                    <ul id="upcoming-list" class="upcoming-list"><li class="empty-upcoming">確認中...</li></ul>
+                </section>
+                <button id="timetable-open" class="timetable-open-btn" type="button">
+                    <span class="button-content"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M7 3v4M17 3v4M3 10h18M7 14h3M7 17h3M14 14h3"></path></svg>時刻表を見る</span>
+                    <span class="button-chevron" aria-hidden="true">›</span>
+                </button>
+                <button id="refresh-btn" class="refresh-btn" type="button">表示を更新</button>
+                <p class="app-version">ver 1.03</p>
+            </section>
+            <section id="timetable-view" class="screen timetable-screen" aria-labelledby="timetable-title" hidden>
+                <div class="timetable-heading">
+                    <button id="timetable-close" class="back-btn" type="button" aria-label="ホームに戻る"><span aria-hidden="true">‹</span></button>
+                    <h2 id="timetable-title">時刻表</h2>
+                </div>
+                <div class="timetable-route-card">
+                    <p id="timetable-departure" class="route-caption">パークタウン入口 発</p>
+                    <p id="timetable-route" class="timetable-route">東松山駅〔東口〕行き</p>
+                </div>
+                <div class="field-block">
+                    <h3 class="section-label">乗る方向</h3>
+                    <div class="segmented-control" role="group" aria-label="時刻表の方向">
+                        <button id="timetable-outbound" type="button" class="segment-btn" aria-pressed="true">駅へ行く</button>
+                        <button id="timetable-inbound" type="button" class="segment-btn" aria-pressed="false">帰る</button>
+                    </div>
+                </div>
+                <div class="field-block">
+                    <h3 class="section-label">ダイヤ</h3>
+                    <div class="segmented-control" role="group" aria-label="平日・土日祝の切り替え">
+                        <button id="timetable-weekday" type="button" class="segment-btn" aria-pressed="false">平日</button>
+                        <button id="timetable-holiday" type="button" class="segment-btn" aria-pressed="true">土日祝</button>
+                    </div>
+                </div>
+                <div class="timetable-list-heading">
+                    <h3 class="section-title">出発時刻</h3>
+                    <span id="timetable-today-badge" class="daytype-badge">今日のダイヤ</span>
+                </div>
+                <div id="timetable-body" class="timetable-hours" aria-label="出発時刻一覧"></div>
+                <p class="timetable-note">数字は各時台の「分」です。祝日・お盆・年末年始は土日祝ダイヤで運行します。時刻表の改正や道路状況により実際の運行は変わる場合があります。</p>
+            </section>
+        </main>
     </div>
     <script src="app.js"></script>
 </body>

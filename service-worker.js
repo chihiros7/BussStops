@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bus-app-1.02';
+const CACHE_NAME = 'bus-app-1.03';
 
 const ASSETS = [
   './',
