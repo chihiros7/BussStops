@@ -146,6 +146,11 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('refresh-btn').addEventListener('click', updateCountdown);
     document.getElementById('train-up').addEventListener('click', () => switchTrainDirection('up'));
     document.getElementById('train-down').addEventListener('click', () => switchTrainDirection('down'));
+    document.getElementById('train-toggle').addEventListener('click', () => {
+        const details = document.getElementById('train-details');
+        details.hidden = !details.hidden;
+        document.getElementById('train-toggle').setAttribute('aria-expanded', String(!details.hidden));
+    });
 
     document.getElementById('timetable-open').addEventListener('click', () => {
         selectedDaytype = usesHolidayTimetable(new Date()) ? 'holiday' : 'weekday';
@@ -233,10 +238,26 @@ function formatClock(date) {
     return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
 
+function getTransferEstimate(nextBus, direction = trainDirection) {
+    if (!nextBus) return null;
+    const stationArrival = new Date(nextBus.departure.getTime() + BUS_TO_STATION_MINUTES * 60000);
+    const platformReady = new Date(stationArrival.getTime() + STATION_TRANSFER_MINUTES * 60000);
+    const train = findUpcomingTrains(platformReady, direction, 1)[0] ?? null;
+    return {
+        stationArrival,
+        platformReady,
+        train,
+        waitMinutes: train ? Math.floor((train.departure - stationArrival) / 60000) : null,
+        bufferMinutes: train ? Math.floor((train.departure - platformReady) / 60000) : null
+    };
+}
+
 function renderTrainDisplay(now, nextBus) {
+    document.getElementById('train-section').hidden = currentDirection !== 'outbound';
     const railServiceDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (now.getHours() < 3 ? 1 : 0));
     const railHoliday = usesRailHolidayTimetable(railServiceDay);
     document.getElementById('train-daytype-badge').textContent = railHoliday ? '土日祝・予定' : '平日・予定';
+    document.getElementById('train-quick-direction').textContent = trainDirection === 'up' ? '池袋方面' : '小川町方面';
     for (const direction of ['up', 'down']) {
         const button = document.getElementById(`train-${direction}`);
         const active = trainDirection === direction;
@@ -279,18 +300,32 @@ function renderTrainDisplay(now, nextBus) {
     if (currentDirection !== 'outbound') return;
     const arrival = document.getElementById('connection-bus-arrival');
     const suggested = document.getElementById('connection-train');
+    const quickRoute = document.getElementById('train-quick-route');
+    const quickWait = document.getElementById('train-quick-wait');
+    const quickBuffer = document.getElementById('train-quick-buffer');
+    quickBuffer.hidden = true;
     if (!nextBus) {
         arrival.textContent = '本日の駅行きバスは終了しています';
         suggested.textContent = '次の運行日にご確認ください';
+        quickRoute.textContent = '本日の駅行きバスは終了しました';
+        quickWait.textContent = '電車の時刻はタップして確認';
         return;
     }
-    const stationArrival = new Date(nextBus.departure.getTime() + BUS_TO_STATION_MINUTES * 60000);
-    const platformReady = new Date(stationArrival.getTime() + STATION_TRANSFER_MINUTES * 60000);
-    const train = findUpcomingTrains(platformReady, trainDirection, 1)[0];
+    const estimate = getTransferEstimate(nextBus);
+    const { stationArrival, train, bufferMinutes, waitMinutes } = estimate;
     arrival.textContent = `バス ${formatClock(nextBus.departure)}発 → 駅 ${formatClock(stationArrival)}着の目安`;
     suggested.textContent = train
-        ? `乗換候補：${formatClock(train.departure)}発 ${train.kind}（余裕約${Math.floor((train.departure - platformReady) / 60000)}分）`
+        ? `乗換候補：${formatClock(train.departure)}発 ${train.kind}（余裕約${bufferMinutes}分）`
         : '乗り継ぎ候補が見つかりません';
+    quickRoute.textContent = train
+        ? `駅 ${formatClock(stationArrival)}着見込 → 電車 ${formatClock(train.departure)}発（予定）`
+        : `駅 ${formatClock(stationArrival)}着見込 → 電車候補なし`;
+    quickWait.textContent = train ? `駅到着から約${waitMinutes}分で発車` : '候補の電車が見つかりません';
+    if (train) {
+        quickBuffer.hidden = false;
+        quickBuffer.textContent = `乗換余裕約${bufferMinutes}分`;
+        quickBuffer.classList.toggle('tight', bufferMinutes < 5);
+    }
 }
 
 function selectDaytype(daytype) {
