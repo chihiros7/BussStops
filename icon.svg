@@ -1,23 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
-  <title id="title">東バス山のアプリアイコン</title>
+  <title id="title">東とバスと山を組み合わせた東バス山のアイコン</title>
   <defs>
-    <linearGradient id="forest" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#1c915e"/>
-      <stop offset="1" stop-color="#126a45"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#239763"/>
+      <stop offset="1" stop-color="#085f43"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" fill="url(#forest)"/>
-  <!-- 東松山を連想させる二つの山並み -->
-  <path d="M85 267 174 139 245 235 309 167 427 291" fill="none" stroke="#aee7c1" stroke-width="23" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="m155 167 19-28 22 31" fill="none" stroke="#e6fff0" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- 小さくても判別できる正面向きのバス -->
-  <rect x="119" y="231" width="274" height="197" rx="48" fill="#fff"/>
-  <rect x="151" y="264" width="210" height="93" rx="17" fill="#16784c"/>
-  <path d="M165 280h181" stroke="#aee7c1" stroke-width="8" stroke-linecap="round"/>
-  <path d="M256 273v75" stroke="#aee7c1" stroke-width="6" stroke-linecap="round"/>
-  <rect x="174" y="374" width="164" height="11" rx="5.5" fill="#d3efdc"/>
-  <circle cx="172" cy="397" r="15" fill="#16784c"/>
-  <circle cx="340" cy="397" r="15" fill="#16784c"/>
-  <rect x="153" y="425" width="54" height="21" rx="9" fill="#fff"/>
-  <rect x="305" y="425" width="54" height="21" rx="9" fill="#fff"/>
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
+  <rect x="22" y="22" width="468" height="468" rx="92" fill="none" stroke="#b7e8c7" stroke-opacity=".24" stroke-width="4"/>
+  <text x="101" y="275" fill="#fff" text-anchor="middle" font-family="Noto Sans CJK JP, sans-serif" font-weight="900" font-size="118">東</text>
+  <text x="409" y="275" fill="#fff" text-anchor="middle" font-family="Noto Sans CJK JP, sans-serif" font-weight="900" font-size="118">山</text>
+  <g transform="translate(172 157)">
+    <rect x="0" y="0" width="168" height="161" rx="32" fill="#f6fff6"/>
+    <rect x="18" y="26" width="132" height="70" rx="12" fill="#146d4b"/>
+    <path d="M84 28v66" stroke="#a9e0be" stroke-width="6"/>
+    <rect x="19" y="108" width="130" height="10" rx="5" fill="#c9ecd4"/>
+    <circle cx="31" cy="136" r="12" fill="#136b49"/>
+    <circle cx="137" cy="136" r="12" fill="#136b49"/>
+    <rect x="25" y="158" width="36" height="17" rx="5" fill="#f6fff6"/>
+    <rect x="107" y="158" width="36" height="17" rx="5" fill="#f6fff6"/>
+  </g>
+  <path d="M75 347h362" stroke="#b3e6c5" stroke-width="3" stroke-opacity=".55"/>
+  <text x="256" y="429" fill="#f6fff6" text-anchor="middle" font-family="Noto Sans CJK JP, sans-serif" font-weight="900" font-size="75" letter-spacing="-1">東バス山</text>
 </svg>
