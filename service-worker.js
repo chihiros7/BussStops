@@ -1,11 +1,11 @@
-const CACHE_NAME = 'bus-app-1.04';
+const CACHE_NAME = 'bus-app-1.05';
 
 const ASSETS = [
   './',
   './index.html',
-  './style.css',
-  './app.js',
-  './train-data.js',
+  './style.css?v=105',
+  './app.js?v=105',
+  './train-data.js?v=105',
   './manifest.json'
 ];
 
@@ -33,9 +33,17 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            return cachedResponse || fetch(event.request);
-        })
-    );
+  if (event.request.method !== 'GET' || new URL(event.request.url).origin !== self.location.origin) {
+    return;
+  }
+
+  // 公開後の更新をすぐ反映し、オフライン時だけ保存済みファイルを使用する。
+  event.respondWith(
+    fetch(event.request).catch(async () => {
+      const cachedResponse = await caches.match(event.request);
+      if (cachedResponse) return cachedResponse;
+      if (event.request.mode === 'navigate') return caches.match('./index.html');
+      return Response.error();
+    })
+  );
 });
