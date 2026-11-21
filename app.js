@@ -177,6 +177,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function switchDirection(direction) {
     currentDirection = direction;
+    // 行き／帰りの切り替え後は常に省スペース表示に戻す。
+    document.getElementById('train-details').hidden = true;
+    document.getElementById('train-toggle').setAttribute('aria-expanded', 'false');
     try { localStorage.setItem(DIRECTION_KEY, direction); } catch (_) { /* 保存不可でも動作する */ }
     updateCountdown();
     if (!document.getElementById('timetable-view').hidden) renderTimetable();
